@@ -268,3 +268,20 @@ LINEs and other metadata extracted from that array."))
             :do (unless (null nextline) (setf (line-next l) nextline))
                 (setf nextline l))
       (values file))))
+
+
+  ;;
+;;;;;; Filesystem interaction.
+  ;;
+
+(defgeneric list-corpus-files (dir)
+  (:documentation
+"Returns a list of corpus files in the directory DIR. The DIR can be a
+pathname or a string which is converted to a pathname."))
+
+(defmethod list-corpus-files ((dir string))
+  (list-corpus-files (uiop:merge-pathnames* dir)))
+
+(defmethod list-corpus-files ((dir pathname))
+  (let ((potential-files (directory (uiop:merge-pathnames* dir "*.txt" ))))
+    (remove-if-not #'corpus-file-p potential-files)))
