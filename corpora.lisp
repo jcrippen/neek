@@ -8,9 +8,14 @@
 
 (defclass corpus ()
   ((entries :type (vector entry *)
+            :initarg :entries
             :documentation "A vector of corpus entries.")
    (entnum  :type fixnum
-            :documentation "Number of entries in ENTRIES slot."))
+            :initarg :entnum
+            :documentation "Number of entries in ENTRIES slot.")
+   (filenum :type fixnum
+            :initarg :filenum
+            :documentation "Number of files in corpus."))
   (:documentation
    "The top-level object that contains a corpus. The ENTRIES slot contains a
 vector of ENTRY instances, one for each entry in the corpus."))
@@ -25,6 +30,8 @@ ENTRY instances for each entry in the corpus."))
 
 (defmethod load-corpus ((dir pathname))
   (let ((files (mapcar #'make-file (list-corpus-files dir)))
+        (filenum 0)
+        (entnum 0)
         (entries (make-array 0 :element-type 'entry
                                :adjustable t
                                :fill-pointer 0)))
@@ -34,11 +41,14 @@ ENTRY instances for each entry in the corpus."))
     ;; appropriate.
     (loop :for f :in files
           :with ent                     ;current entry
+          :when (not (null f))
+            :do (incf filenum)
           :until (null f)
           :do
              (if (null ent)
                  ;; First time so make a new entry.
                  (progn (setf ent (make-entry-from-file f))
+                        (incf entnum)
                         (vector-push-extend ent entries))
                  (if (file-matches-entry-p f ent)
                      ;; Add to current entry.
@@ -52,5 +62,11 @@ ENTRY instances for each entry in the corpus."))
                            ;; No matches so make a new entry from this file.
                            (progn
                              (setf ent (make-entry-from-file f))
+                             (incf entnum)
                              (vector-push-extend ent entries)))))))
-    (values entries)))
+    ;; Now make a CORPUS instance and return it.
+    (values
+     (make-instance 'corpus
+                    :entries entries
+                    :entnum entnum
+                    :filenum filenum))))
