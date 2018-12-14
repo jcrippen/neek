@@ -88,3 +88,54 @@ updated with information from F. The ENTRY slot in F is also set to E."))
 (defmethod add-file-to-entry :after ((f trans-file) (e entry))
   (unless (slot-boundp e 'translator)
     (setf (entry-translator e) (file-translator f))))
+
+(defgeneric make-entry-from-file (f)
+  (:documentation
+"Creates an instance of ENTRY based on the properties of the file F. Returns
+the new ENTRY instance. Does not store the file in the entry."))
+
+(defmethod make-entry-from-file ((f file))
+  (make-instance 'entry
+                 :number (file-number f)
+                 :numstr (file-numstr f)
+                 :title  (file-title f)
+                 :author (file-author f)))
+
+(defgeneric file-in-entry-p (f e)
+  (:documentation
+"Returns T if the file F is in the entry E."))
+
+(defmethod file-in-entry-p ((f text-file) (e entry))
+  (or (equalp f (entry-text-file e))
+      (and (equalp (file-number f) (file-number (entry-text-file e)))
+           (equalp (file-numstr f) (file-numstr (entry-text-file e))))))
+
+(defmethod file-in-entry-p ((f trans-file) (e entry))
+  (or (equalp f (entry-trans-file e))
+      (and (equalp (file-number f) (file-number (entry-trans-file e)))
+           (equalp (file-numstr f) (file-numstr (entry-trans-file e))))))
+
+(defmethod file-in-entry-p ((f orig-file) (e entry))
+  (or (equalp f (entry-orig-file e))
+      (and (equalp (file-number f) (file-number (entry-orig-file e)))
+           (equalp (file-numstr f) (file-numstr (entry-orig-file e))))))
+
+(defmethod file-in-entry-p ((f gloss-file) (e entry))
+  (or (equalp f (entry-gloss-file e))
+      (and (equalp (file-number f) (file-number (entry-gloss-file e)))
+           (equalp (file-numstr f) (file-numstr (entry-gloss-file e))))))
+
+(defmethod file-in-entry-p ((f tag-file) (e entry))
+  (or (equalp f (entry-tag-file e))
+      (and (equalp (file-number f) (file-number (entry-tag-file e)))
+           (equalp (file-numstr f) (file-numstr (entry-tag-file e))))))
+
+(defgeneric file-matches-entry-p (f e)
+  (:documentation
+"Returns T if the file F should be stored in (belongs to) entry E.
+This does not check if F is actually stored in E, but rather whether the
+metadata of E and F match so that F should be one of the files of E."))
+
+(defmethod file-matches-entry-p ((f file) (e entry))
+  (and (equalp (file-number f) (entry-number e))
+       (equalp (file-numstr f) (entry-numstr e))))

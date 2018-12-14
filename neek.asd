@@ -22,4 +22,5 @@
                (:file "config")
                (:file "lines")
                (:file "files")
+               (:file "entries")
                (:file "corpora")))
