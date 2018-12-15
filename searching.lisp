@@ -44,7 +44,7 @@ and the results."))
     (loop :for f :across (corpus-files corpus)
           :do (loop :for l :across (file-lines f)
                     :when (and (data-line-p l)
-                               (if (this-search 
+                               (if (csearch-regexp-p this-search)
                                    (cl-ppcre:scan string (line-contents l))
                                    (search string (line-contents l))))
                       :do (vector-push-extend l (csearch-results this-search))
