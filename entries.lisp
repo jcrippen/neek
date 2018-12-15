@@ -71,9 +71,9 @@ updated with information from F. The ENTRY slot in F is also set to E."))
       (setf (entry-tag-file e) f)))
 
 (defmethod add-file-to-entry :after ((f file) (e entry))
-  ;; FIXME: Repetitive. Should have something that maps over a list of
-  ;; slots. Could be a list of conses where the car is a symbol for a slot in
-  ;; E and cdr a symbol for a slot in F.
+  ;; FIXME: Repetitive.
+  (unless (slot-boundp f 'entry)
+    (setf (file-entry f) e))
   (unless (slot-boundp e 'number)
     (setf (entry-number e) (file-number f)))
   (unless (slot-boundp e 'numstr)
@@ -81,9 +81,7 @@ updated with information from F. The ENTRY slot in F is also set to E."))
   (unless (slot-boundp e 'author)
     (setf (entry-author e) (file-author f)))
   (unless (slot-boundp e 'title)
-    (setf (entry-title e) (file-title f)))
-  (unless (slot-boundp f 'entry)
-    (setf (file-entry f) e)))
+    (setf (entry-title e) (file-title f))))
 
 (defmethod add-file-to-entry :after ((f trans-file) (e entry))
   (unless (slot-boundp e 'translator)

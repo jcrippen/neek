@@ -10,15 +10,19 @@
 
 (defclass corpus ()
   ((entries :type (vector entry *)
+            :accessor corpus-entries
             :initarg :entries
             :documentation "A vector of corpus entries.")
    (entnum  :type fixnum
+            :accessor corpus-entnum
             :initarg :entnum
             :documentation "Number of entries in the corpus.")
    (files   :type (vector file *)
+            :accessor corpus-files
             :initarg :files
             :documentation "A vector of files in the corpus.")
    (filenum :type fixnum
+            :accessor corpus-filenum
             :initarg :filenum
             :documentation "Number of files in the corpus."))
   (:documentation
@@ -44,20 +48,17 @@ ENTRY instances for each entry in the corpus."))
                                :adjustable t
                                :fill-pointer 0)))
     ;; FIXME: Better error.
-    (if (null files) (error "No corpus files found."))
+    (if (null flist) (error "No corpus files found."))
     ;; CDR down the files list, storing each one in the file vector and adding
     ;; it to an entry or making a new entry for it as appropriate.
     (loop :for f :in flist
           :with ent                     ;current entry
-          :when (not (null f))
-            :do
-               (vector-push-extend f files)
-               (incf filenum)
           :until (null f)
             :do
              (if (null ent)
                  ;; First time so make a new entry.
                  (progn (setf ent (make-entry-from-file f))
+                        (add-file-to-entry f ent)
                         (incf entnum)
                         (vector-push-extend ent entries))
                  (if (file-matches-entry-p f ent)
@@ -72,8 +73,11 @@ ENTRY instances for each entry in the corpus."))
                            (add-file-to-entry f match)
                            ;; No matches so make a new entry from this file.
                            (progn (setf ent (make-entry-from-file f))
+                                  (add-file-to-entry f ent)
                                   (incf entnum)
-                                  (vector-push-extend ent entries)))))))
+                                  (vector-push-extend ent entries))))))
+             (vector-push-extend f files)
+             (incf filenum))
     ;; Now make a CORPUS instance and return it.
     (values
      (make-instance 'corpus
