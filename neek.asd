@@ -15,7 +15,8 @@
                "alexandria"
                "cl-unicode"
                "string-case"
-               "split-sequence")
+               "split-sequence"
+               "cl-ppcre")
   ;; FIXME: Make not hardcoded serial using :DEPENDS-ON in :COMPONENTS.
   :serial t
   :components ((:file "package")
@@ -23,4 +24,5 @@
                (:file "lines")
                (:file "files")
                (:file "entries")
-               (:file "corpora")))
+               (:file "corpora")
+               (:file "searching")))
